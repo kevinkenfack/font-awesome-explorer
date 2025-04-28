@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Font Awesome Explorer
 
-## Getting Started
+Une application web moderne pour explorer et utiliser les icônes Font Awesome de manière intuitive.
 
-First, run the development server:
+![Font Awesome Explorer](public/preview.png)
 
+## 🚀 Fonctionnalités
+
+- 🔍 Recherche avancée d'icônes
+- 📱 Interface responsive et moderne
+- 🎨 Support de tous les styles Font Awesome (Solid, Regular, Light, Thin, Duotone, Sharp)
+- 📋 Copie rapide du code HTML, React ou Unicode
+- ⬇️ Téléchargement des icônes en SVG
+- 🏷️ Organisation par catégories
+- 🌓 Mode sombre intégré
+- 🎯 Interface inspirée de Vercel/Next.js
+
+## 🛠️ Installation
+
+1. Clonez le dépôt :
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/kevinkenfack/font-awesome-explorer.git
+cd font-awesome-explorer
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Installez les dépendances :
+```bash
+npm install
+# ou
+yarn install
+# ou
+pnpm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Lancez le serveur de développement :
+```bash
+npm run dev
+# ou
+yarn dev
+# ou
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
 
-## Learn More
+## 📦 Structure du Projet
 
-To learn more about Next.js, take a look at the following resources:
+```
+font-awesome-explorer/
+├── public/
+│   └── icons/          # Dossier des icônes Font Awesome
+├── src/
+│   ├── app/           # Pages Next.js
+│   ├── components/    # Composants React
+│   ├── services/      # Services et utilitaires
+│   └── styles/        # Styles globaux
+├── .gitignore
+├── package.json
+└── README.md
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🎨 Technologies Utilisées
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [Next.js](https://nextjs.org/) - Framework React
+- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS
+- [Font Awesome](https://fontawesome.com/) - Bibliothèque d'icônes
+- [TypeScript](https://www.typescriptlang.org/) - Typage statique
 
-## Deploy on Vercel
+## 🔧 Configuration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Variables d'Environnement
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Créez un fichier `.env.local` à la racine du projet :
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+## 📝 Utilisation
+
+1. **Recherche d'icônes**
+   - Utilisez la barre de recherche pour trouver des icônes
+   - Filtrez par catégorie ou style
+
+2. **Copie d'icônes**
+   - Cliquez sur une icône pour ouvrir la modal
+   - Choisissez le format de code (HTML, React, Unicode)
+   - Copiez le code avec un seul clic
+
+3. **Téléchargement**
+   - Ouvrez la modal d'une icône
+   - Cliquez sur le bouton "Télécharger SVG"
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Voici comment contribuer :
+
+1. Fork le projet
+2. Créez une branche (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 🙏 Remerciements
+
+- [Font Awesome](https://fontawesome.com/) pour leur incroyable bibliothèque d'icônes
+- [Next.js](https://nextjs.org/) pour leur framework React
+- [Tailwind CSS](https://tailwindcss.com/) pour leur framework CSS
+
+## 📞 Contact
+
+Votre Nom - [@votre-twitter](https://twitter.com/votre-twitter)
+
+Lien du Projet : [https://github.com/votre-username/font-awesome-explorer](https://github.com/votre-username/font-awesome-explorer)
