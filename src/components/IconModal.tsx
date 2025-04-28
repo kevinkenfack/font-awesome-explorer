@@ -1,187 +1,141 @@
-import React from 'react';
-import { Icon, getIconHtmlCode, getIconReactCode, getSvgPath, getFormattedStyleName } from '../services/icons';
+import React, { useState, useEffect } from 'react';
+import { Icon, getSvgPath } from '../services/icons';
 
 interface IconModalProps {
   icon: Icon | null;
   onClose: () => void;
 }
 
+const TABS = [
+  { label: 'HTML', value: 'html' },
+  { label: 'REACT', value: 'react' },
+  { label: 'SVG', value: 'svg' },
+];
+
+function getIconCode(icon: Icon, style: string, tab: string, svgContent: string, svgPreviewOnly = false) {
+  if (tab === 'html') {
+    return `<i class="fa-${style} fa-${icon.name}"></i>`;
+  }
+  if (tab === 'react') {
+    return `<FontAwesomeIcon icon={['${style}', '${icon.name}']} />`;
+  }
+  if (tab === 'svg') {
+    if (svgPreviewOnly && svgContent.length > 100) {
+      return svgContent.slice(0, 100) + '...';
+    }
+    return svgContent || '<svg>...</svg>';
+  }
+  return '';
+}
+
 export default function IconModal({ icon, onClose }: IconModalProps) {
+  const [tab, setTab] = useState('html');
+  const [svgContent, setSvgContent] = useState('');
+  const [loadingSvg, setLoadingSvg] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+    if (icon && tab === 'svg') {
+      setLoadingSvg(true);
+      fetch(getSvgPath(icon, icon.styles[0]))
+        .then(res => res.text())
+        .then(svg => setSvgContent(svg))
+        .catch(() => setSvgContent('<svg>Erreur de chargement</svg>'))
+        .finally(() => setLoadingSvg(false));
+    }
+  }, [icon, tab]);
+
   if (!icon) return null;
+  const style = icon.styles[0];
+  const isPro = icon.family?.toLowerCase().includes('pro');
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert('Copié dans le presse-papier !');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
     } catch (err) {
       console.error('Erreur lors de la copie:', err);
     }
   };
 
-  const handleDownloadSvg = async () => {
-    try {
-      const response = await fetch(getSvgPath(icon, icon.styles[0]));
-      const svgText = await response.text();
-      const blob = new Blob([svgText], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${icon.name}.svg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-    }
-  };
+  // Détermine le code à afficher (aperçu ou complet)
+  const codeToShow = tab === 'svg'
+    ? (loadingSvg ? 'Chargement du SVG...' : getIconCode(icon, style, tab, svgContent, true))
+    : getIconCode(icon, style, tab, svgContent);
 
-  const handleCopySvg = async () => {
-    try {
-      const response = await fetch(getSvgPath(icon, icon.styles[0]));
-      const svgText = await response.text();
-      await copyToClipboard(svgText);
-    } catch (error) {
-      console.error('Erreur lors de la copie du SVG:', error);
-    }
-  };
+  // Détermine le code à copier (toujours complet)
+  const codeToCopy = tab === 'svg'
+    ? svgContent
+    : getIconCode(icon, style, tab, svgContent);
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-      onClick={onClose}
-    >
-      {/* Overlay avec flou */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      
-      {/* Modal */}
-      <div 
-        className="relative bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8 flex flex-col items-center"
         onClick={e => e.stopPropagation()}
       >
-        {/* En-tête */}
-        <div className="sticky top-0 bg-gray-800 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-700 z-10">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-xl font-semibold text-white truncate">
-              {icon.name}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+        {/* Toast notification */}
+        {showToast && (
+          <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 animate-fade-in-out">
+            Copié avec succès !
           </div>
+        )}
+        {/* Fermer */}
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold">×</button>
+        {/* Nom + badge */}
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-2xl font-bold text-gray-900">{icon.name}</h2>
+          {isPro && <span className="bg-yellow-400 text-xs font-bold px-2 py-1 rounded text-gray-900">PRO</span>}
         </div>
-
-        {/* Contenu */}
-        <div className="p-4 sm:p-6">
-          {/* Aperçu de l'icône */}
-          <div className="flex items-center justify-center mb-6 sm:mb-8">
-            <div className="bg-gray-800 rounded-lg p-6 sm:p-8">
-              <i 
-                className={`fa-${icon.styles[0]} fa-${icon.name} text-5xl sm:text-6xl text-white`}
-                style={{ 
-                  fontFamily: 'Font Awesome 6 Pro',
-                  fontWeight: icon.styles[0] === 'solid' ? 900 : 
-                             icon.styles[0] === 'regular' ? 400 :
-                             icon.styles[0] === 'light' ? 300 :
-                             icon.styles[0] === 'thin' ? 100 : 900
-                }}
-              ></i>
-            </div>
-          </div>
-
-          {/* Détails */}
-          <div className="grid grid-cols-1 gap-4 sm:gap-6">
-            <div className="space-y-3 sm:space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-1 sm:mb-2">Style</h3>
-                <p className="text-white">{getFormattedStyleName(icon.styles[0])}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-1 sm:mb-2">Styles disponibles</h3>
-                <div className="flex flex-wrap gap-2">
-                  {icon.styles.map((style, index) => (
-                    <span key={index} className="px-2 py-1 bg-gray-800 rounded text-xs sm:text-sm text-white">
-                      {getFormattedStyleName(style)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-1 sm:mb-2">Unicode</h3>
-                <p className="text-white font-mono text-sm">{icon.unicode}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-400 mb-1 sm:mb-2">Famille</h3>
-                <p className="text-white">{icon.family}</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Catégories</h3>
-              <div className="flex flex-wrap gap-2">
-                {icon.categories.map((category, index) => (
-                  <span key={index} className="px-2 py-1 bg-gray-800 rounded text-xs sm:text-sm text-white">
-                    {category}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Boutons d'action */}
-          <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        {/* Icône */}
+        <div className="flex items-center justify-center w-32 h-32 rounded-xl bg-gray-50 mb-6">
+          <i
+            className={`fa-${style} fa-${icon.name} text-7xl text-blue-900`}
+            style={{ fontFamily: 'Font Awesome 6 Pro', fontWeight: style === 'solid' ? 900 : 400 }}
+          ></i>
+        </div>
+        {/* Onglets */}
+        <div className="flex gap-2 mb-2">
+          {TABS.map(t => (
             <button
-              onClick={() => copyToClipboard(getIconHtmlCode(icon, icon.styles[0]))}
-              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+              key={t.value}
+              className={`px-4 py-1 rounded-full text-sm font-semibold transition-colors ${tab === t.value ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-blue-100'}`}
+              onClick={() => setTab(t.value)}
             >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-              </svg>
-              Copier HTML
+              {t.label}
             </button>
-            <button
-              onClick={() => copyToClipboard(getIconReactCode(icon, icon.styles[0]))}
-              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-              </svg>
-              Copier React
-            </button>
-            <button
-              onClick={() => copyToClipboard(icon.unicode)}
-              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-              </svg>
-              Copier Unicode
-            </button>
-            <button
-              onClick={handleCopySvg}
-              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-              </svg>
-              Copier SVG
-            </button>
-            <button
-              onClick={handleDownloadSvg}
-              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Télécharger SVG
-            </button>
-          </div>
+          ))}
+        </div>
+        {/* Code */}
+        <div className="w-full bg-gray-900 rounded-lg p-4 mb-4 flex items-center justify-between">
+          <code className="text-blue-200 text-sm break-all" style={{maxHeight: 200, overflowY: 'auto'}}>
+            {codeToShow}
+          </code>
+          <button
+            className="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            onClick={() => copyToClipboard(codeToCopy)}
+          >
+            Copier
+          </button>
+        </div>
+        {/* Badges catégories */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {icon.categories.map(cat => (
+            <span key={cat} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">{cat}</span>
+          ))}
+        </div>
+        {/* Actions */}
+        <div className="flex gap-3 w-full">
+          <a
+            href={`/icons/svgs/${style}/${icon.name}.svg`}
+            download
+            className="flex-1 px-4 py-2 bg-gray-100 rounded-lg text-center font-semibold text-gray-700 hover:bg-blue-50 transition"
+          >
+            Télécharger SVG
+          </a>
         </div>
       </div>
     </div>
   );
-} 
+}
