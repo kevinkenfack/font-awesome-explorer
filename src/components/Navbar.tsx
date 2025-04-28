@@ -3,7 +3,7 @@ import React from 'react';
 export default function Navbar() {
   return (
     <nav className="w-full bg-[#f9f9f9] shadow-sm py-3 px-4 md:px-10 flex items-center justify-between mb-0 sticky top-0 z-40">
-      <div className="text-2xl font-bold text-gray-900 tracking-tight">Font Awesome Explorer</div>
+      <div className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">Font Awesome Explorer</div>
       <div className="flex items-center gap-4">
         <a
           href="https://github.com/kevinkenfack/font-awesome-explorer"

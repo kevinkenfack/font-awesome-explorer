@@ -8,7 +8,7 @@ export default function Header() {
           Font Awesome Explorer
         </h1>
         <p className="text-[18px] md:text-[24px] font-medium text-black/50 leading-[145%] text-center max-w-2xl mx-auto mb-4">
-          Explorez la collection complète d&apos;icônes Font Awesome pro et trouvez celle qui correspond à votre projet
+          Explorez la collection complète d&apos;icônes <span className="font-extrabold text-yellow-500">Font Awesome pro</span> et trouvez celle qui correspond à votre projet
         </p>
       </div>
     </div>
